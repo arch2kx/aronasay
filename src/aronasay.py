@@ -23,30 +23,56 @@ except ModuleNotFoundError:
     # Art module already embedded by install script
     pass
 
+def strip_ansi_codes(text):
+    """Remove ANSI escape codes from text"""
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+def get_visible_length(text):
+    """Get the visible length of text (excluding ANSI codes)"""
+    return len(strip_ansi_codes(text))
+
 def create_speech_bubble(text, width=40):
     """Create a speech bubble for the given text."""
     lines = []
     for line in text.split('\n'):
-        lines.extend(textwrap.wrap(line, width) if line else [''])
+        if line:
+            # Check if line is already short enough
+            if get_visible_length(line) <= width:
+                lines.append(line)
+            else:
+                # For lines with ANSI codes, we need to be more careful
+                # Strip ANSI, wrap, then we lose colors but maintain structure
+                clean_line = strip_ansi_codes(line)
+                wrapped = textwrap.wrap(clean_line, width) if clean_line else ['']
+                lines.extend(wrapped)
+        else:
+            lines.append('')
 
     if not lines:
         lines = ['']
 
-    max_len = max(len(line) for line in lines)
+    # Calculate max visible length
+    max_len = max(get_visible_length(line) for line in lines)
 
     bubble = []
     bubble.append(' ' + '-' * (max_len + 2))
 
     if len(lines) == 1:
-        bubble.append(f'< {lines[0].ljust(max_len)} >')
+        visible_len = get_visible_length(lines[0])
+        padding = ' ' * (max_len - visible_len)
+        bubble.append(f'< {lines[0]}{padding} >')
     else:
         for i, line in enumerate(lines):
+            visible_len = get_visible_length(line)
+            padding = ' ' * (max_len - visible_len)
             if i == 0:
-                bubble.append(f'/ {line.ljust(max_len)} |')
+                bubble.append(f'/ {line}{padding} |')
             elif i == len(lines) - 1:
-                bubble.append(f'\\ {line.ljust(max_len)} |')
+                bubble.append(f'\\ {line}{padding} |')
             else:
-                bubble.append(f'| {line.ljust(max_len)} |')
+                bubble.append(f'| {line}{padding} |')
 
     bubble.append(' ' + '-' * (max_len + 2))
     return '\n'.join(bubble)
@@ -327,7 +353,13 @@ Examples:
         return
 
     # Static mode with text
-    text = ' '.join(args.text) if args.text else ''
+    # Check if input is from pipe/stdin
+    if not sys.stdin.isatty():
+        # Read from stdin (pipe)
+        text = sys.stdin.read().strip()
+    else:
+        # Read from command line arguments
+        text = ' '.join(args.text) if args.text else ''
 
     if text:
         bubble = create_speech_bubble(text, args.width)

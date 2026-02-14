@@ -15,12 +15,10 @@ Inspired by [Momoisay](https://github.com/Mon4sm/momoisay) by Mon4sm.
 
 ## Features
 
-* 🗨️ Talking ASCII art of Arona
-* 🎬 Animated ASCII art of Arona  
-* 🎨 Freestyle mode with random animations
-* 📜 Multiple versions to choose from
-* 💬 Customizable speech bubble width
-* 🔧 Pipe-friendly (works with stdin)
+* Talking ASCII art of Arona
+* Animated ASCII art of Arona
+* Multiple versions to choose from
+* Pipe-friendly (works with stdin)
 
 ## Installation
 
@@ -74,13 +72,6 @@ aronasay -a 2
 aronasay -l
 ```
 
-### Freestyle Mode
-
-```bash
-# Random animations (press Ctrl+C to stop)
-aronasay -f
-```
-
 This is perfect for terminal eye candy or ricing your setup!
 
 ### Customization
@@ -90,7 +81,6 @@ This is perfect for terminal eye candy or ricing your setup!
 aronasay -w 60 "This is a wider speech bubble!"
 
 # Combine with other tools
-neofetch | aronasay
 date | aronasay
 ```
 
@@ -108,6 +98,9 @@ git log -1 --pretty=%B | aronasay
 
 # System info
 uname -a | aronasay
+
+# Current date and time
+date | aronasay
 
 # Add to your .bashrc or .zshrc for login greeting
 echo "Welcome back, Sensei!" | aronasay
@@ -140,7 +133,6 @@ options:
   -h, --help            show this help message and exit
   -a [VERSION], --animate [VERSION]
                         Show animated Arona (optionally specify version, default: 1)
-  -f, --freestyle       Freestyle mode - random animations (press Ctrl+C to stop)
   -l, --list            List all available versions
   -w WIDTH, --width WIDTH
                         Width of the speech bubble (default: 40)
@@ -174,6 +166,3 @@ This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) 
 - [Momoisay](https://github.com/Mon4sm/momoisay) - Momoi version by Mon4sm (C)
 - [cowsay](https://github.com/piuccio/cowsay) - The original talking cow
 
----
-
-Made with ♥ for Blue Archive fans and terminal enthusiasts!

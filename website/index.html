@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aronasay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="favicon_io/site.webmanifest">
+</head>
+
+<script>
+function showTab(tabId, button) {
+    const tabs = document.querySelectorAll('.tab-content');
+    const buttons = document.querySelectorAll('.tab-button');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    document.getElementById(tabId).classList.add('active');
+    button.classList.add('active');
+}
+
+function smoothScrollTo(id, duration) {
+    const target = document.getElementById(id);
+    const start = window.scrollY;
+    const end = target.getBoundingClientRect().top + window.scrollY;
+    const distance = end - start;
+    let startTime = null;
+
+    function ease(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        window.scrollTo(0, start + distance * ease(progress));
+        if (progress < 1) requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+}
+</script>
+
+<body>
+    <div id="banner">
+        <img src="img/arona.png" alt="">
+        <h1>Aronasay</h1>
+        <h2 class="motto">Cowsay but Arona from Blue Archive</h2>
+        <a class="button" href="#install" onclick="smoothScrollTo('install', 600); return false;">Install Aronasay ➜</a>
+    </div>
+
+    <div class="about">
+        <h2>What is Aronasay?</h2>
+        <p>
+            Aronasay is a CLI program like cowsay, but instead of a talking cow, it's Arona from Blue Archive! Make Arona say anything you want with various ASCII art versions to choose from. Perfect for adding some Blue Archive energy to your terminal!
+            Inspired by Momoisay by Mon4sm.
+        </p>
+    </div>
+
+    <div class="features">
+        <div>
+            <img src="img/open_source_icon.png"></img>
+            <h3>Open Source</h3>
+            <p>Aronasay is completely open source and free to use. Contribute, modify, and share with the community!</p>
+        </div>
+        <div>
+            <img src="img/python_icon.png"></img>
+            <h3>Python 3.6+</h3>
+            <p>Built with Python and supports version 3.6 and above. Easy to install and run on any platform!</p>
+        </div>
+    </div>
+
+    <div class="install-section">
+        <h2>Install Aronasay now</h2>
+        <p class="install-text">
+            Aronasay can be installed by running one of the following commands in your
+            terminal. You can install it via the command line with administrator privileges on either curl or wget.
+        </p>
+
+        <div class="install-box" id="install">
+            <div class="terminal-bar">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="install-tabs">
+                <button class="tab-button active" onclick="showTab('curl', this)">
+                    Install Aronasay via curl
+                </button>
+                <button class="tab-button" onclick="showTab('wget', this)">
+                    Install Aronasay via wget
+                </button>
+            </div>
+
+            <div class="tab-content active" id="curl">
+                <code>curl -fsSL https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sh</code>
+            </div>
+
+            <div class="tab-content" id="wget">
+                <code>wget -qO- https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sh</code>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span class="footer-brand">Aronasay</span>
+            <p>Inspired by cowsay and Momoisay by Mon4sm.</p>
+            <p>Blue Archive belongs to Nexon / NAT Games.</p>
+            <hr class="footer-divider">
+            <a href="https://github.com/arch2kx/aronasay" class="fa-brands fa-github"></a>
+            <p class="footer-copy">&copy; 2025 arch2kx and Aronasay contributors. An open source project licensed under MIT.</p>
+        </div>
+    </footer>
+</body>

@@ -6,30 +6,29 @@ set -e
 echo "Aronasay Uninstall Script"
 echo ""
 
-# Check root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (use sudo)."
-  exit 1
+    echo "Please run as root (use sudo)."
+    exit 1
 fi
 
-INSTALL_PATH="/usr/local/bin/aronasay"
+INSTALL_PATH="${INSTALL_PATH:-/usr/local/bin/aronasay}"
 
-if [ -f "$INSTALL_PATH" ]; then
-  # Ask for confirmation
-  read -p "Are you sure you want to uninstall aronasay? [y/N]: " confirm
-  [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
-
-  echo "Removing $INSTALL_PATH..."
-  rm "$INSTALL_PATH"
-
-  # Check removal
-  if [ ! -f "$INSTALL_PATH" ]; then
-    echo "✓ Aronasay successfully uninstalled."
-  else
-    echo "Failed to remove $INSTALL_PATH. Check permissions."
-  fi
-else
-  echo "Aronasay is not installed at $INSTALL_PATH"
+if [ ! -e "$INSTALL_PATH" ]; then
+    echo "Aronasay is not installed at $INSTALL_PATH"
+    echo ""
+    exit 0
 fi
+
+read -r -p "Are you sure you want to uninstall aronasay from $INSTALL_PATH? [y/N]: " confirm
+case "$confirm" in
+    [Yy]|[Yy][Ee][Ss])
+        echo "Removing $INSTALL_PATH..."
+        rm -f "$INSTALL_PATH"
+        echo "✓ Aronasay successfully uninstalled."
+        ;;
+    *)
+        echo "Aborted."
+        ;;
+esac
 
 echo ""

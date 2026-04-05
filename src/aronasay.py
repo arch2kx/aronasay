@@ -17,11 +17,13 @@ except AttributeError:
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-try:
-    from art import *
-except ModuleNotFoundError:
-    pass
-
+# Import art module in development mode only.
+# In bundled installs, art symbols are already embedded above this file.
+if 'get_static' not in globals():
+    try:
+        from art import *
+    except ModuleNotFoundError:
+        pass
 
 def strip_ansi_codes(text):
     import re

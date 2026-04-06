@@ -1,43 +1,83 @@
-#!/bin/bash
-# Aronasay Installation Script
+#!/bin/sh
+set -eu
 
-set -e
+REPO="arch2kx/aronasay"
+BRANCH="${ARONASAY_BRANCH:-main}"
+
+BASE_RAW_URL="https://raw.githubusercontent.com/$REPO/$BRANCH"
+MAIN_URL="$BASE_RAW_URL/src/aronasay.py"
+ART_URL="$BASE_RAW_URL/src/art/arona_art.py"
+VERSION_URL="$BASE_RAW_URL/VERSION.txt"
+
+APP_NAME="aronasay"
 
 echo "Aronasay Installation Script"
-echo ""
+echo
 
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (use sudo)."
-    exit 1
-fi
-
+# Check Python
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "Python 3 is required but not installed."
+    echo "Error: Python 3 is required but not installed."
     exit 1
 fi
 
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-SRC_DIR="$(cd "$(dirname "$0")/.." && pwd)/src"
-MAIN_FILE="$SRC_DIR/aronasay.py"
-ART_FILE="$SRC_DIR/art/arona_art.py"
-VERSION_FILE="$SRC_DIR/../VERSION.txt"
+# Choose install directory
+if [ "$(id -u)" -eq 0 ]; then
+    INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+elif [ -n "${INSTALL_DIR:-}" ]; then
+    mkdir -p "$INSTALL_DIR"
+elif [ -w "/usr/local/bin" ]; then
+    INSTALL_DIR="/usr/local/bin"
+else
+    INSTALL_DIR="$HOME/.local/bin"
+    mkdir -p "$INSTALL_DIR"
+fi
 
-[ -f "$MAIN_FILE" ] || { echo "Missing $MAIN_FILE"; exit 1; }
-[ -f "$ART_FILE" ] || { echo "Missing $ART_FILE"; exit 1; }
+TARGET="$INSTALL_DIR/$APP_NAME"
 
-echo "Installing aronasay to $INSTALL_DIR..."
+echo "Installing to $TARGET"
 
-TEMP_SCRIPT=$(mktemp)
-trap 'rm -f "$TEMP_SCRIPT"' EXIT
+# Downloader
+download() {
+    url="$1"
+    out="$2"
 
-# Shebang
-cat > "$TEMP_SCRIPT" <<'EOF'
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$url" -o "$out"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO "$out" "$url"
+    else
+        echo "Error: curl or wget is required."
+        exit 1
+    fi
+}
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT INT TERM
+
+MAIN_FILE="$TMP_DIR/aronasay.py"
+ART_FILE="$TMP_DIR/arona_art.py"
+VERSION_FILE="$TMP_DIR/VERSION.txt"
+TEMP_SCRIPT="$TMP_DIR/aronasay"
+
+echo "Downloading program files..."
+download "$MAIN_URL" "$MAIN_FILE"
+download "$ART_URL" "$ART_FILE"
+
+if download "$VERSION_URL" "$VERSION_FILE" 2>/dev/null; then
+    VERSION="$(tr -d '\n' < "$VERSION_FILE")"
+else
+    VERSION="0.0.0"
+fi
+
+echo "Using version: $VERSION"
+
+# Build bundled script
+cat > "$TEMP_SCRIPT" <<EOF
 #!/usr/bin/env python3
 EOF
 
-echo "" >> "$TEMP_SCRIPT"
+printf '\n' >> "$TEMP_SCRIPT"
 
-# Standard-library imports
 cat >> "$TEMP_SCRIPT" <<'EOF'
 import sys
 import os
@@ -49,50 +89,54 @@ import textwrap
 import argparse
 EOF
 
-echo "" >> "$TEMP_SCRIPT"
+printf '\n' >> "$TEMP_SCRIPT"
 
-# Embed art module first
 cat "$ART_FILE" >> "$TEMP_SCRIPT"
 
-echo "" >> "$TEMP_SCRIPT"
-echo "# Version handling" >> "$TEMP_SCRIPT"
-echo "" >> "$TEMP_SCRIPT"
+cat >> "$TEMP_SCRIPT" <<EOF
 
-if [ -f "$VERSION_FILE" ]; then
-    VERSION=$(tr -d '\n' < "$VERSION_FILE")
-else
-    echo "VERSION.txt not found. Defaulting to 0.0.0"
-    VERSION="0.0.0"
-fi
-
-echo "Using version: $VERSION"
-
-cat <<EOF >> "$TEMP_SCRIPT"
 VERSION = "$VERSION"
 
 if "--version" in sys.argv or "-V" in sys.argv:
     print(f"aronasay version {VERSION}")
     sys.exit(0)
+
 EOF
 
-echo "" >> "$TEMP_SCRIPT"
-echo "# Main Program" >> "$TEMP_SCRIPT"
-echo "" >> "$TEMP_SCRIPT"
+# Skip shebang and optional encoding comment
+awk '
+NR == 1 && /^#!/ { next }
+NR == 2 && /coding[:=]/ { next }
+{ print }
+' "$MAIN_FILE" >> "$TEMP_SCRIPT"
 
-# Append main script, skipping only shebang and encoding comment
-tail -n +3 "$MAIN_FILE" >> "$TEMP_SCRIPT"
+chmod 755 "$TEMP_SCRIPT"
+mv "$TEMP_SCRIPT" "$TARGET"
 
-install -m 755 "$TEMP_SCRIPT" "$INSTALL_DIR/aronasay"
-
-echo ""
+echo
 echo "✓ Installation complete!"
-echo ""
-echo "Try it out:"
+echo
+
+case ":$PATH:" in
+    *":$INSTALL_DIR:"*)
+        echo "Run:"
+        echo "  aronasay 'Hello, Sensei!'"
+        ;;
+    *)
+        echo "Installed to: $TARGET"
+        echo
+        echo "Note: $INSTALL_DIR is not in your PATH."
+        echo "Add this to your shell profile:"
+        echo "  export PATH=\"$INSTALL_DIR:\$PATH\""
+        ;;
+esac
+
+echo
+echo "Examples:"
 echo "  aronasay 'Hello, Sensei!'"
 echo "  aronasay -a"
 echo "  aronasay -a hello"
 echo "  aronasay -l"
 echo "  aronasay --version"
-echo ""
+echo
 echo "No external Python packages required."
-echo ""

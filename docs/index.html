@@ -84,8 +84,7 @@ function smoothScrollTo(id, duration) {
     <div class="install-section">
         <h2>Install Aronasay now</h2>
         <p class="install-text">
-            Aronasay can be installed by running one of the following commands in your
-            terminal. You can install it via the command line with administrator privileges on either curl or wget.
+        Aronasay can be installed by running one of the following commands in your terminal using either curl or wget. Administrator privileges are only needed for a system-wide installation.
         </p>
 
         <div class="install-box" id="install">
@@ -105,11 +104,11 @@ function smoothScrollTo(id, duration) {
             </div>
 
             <div class="tab-content active" id="curl">
-                <code>curl -fsSL https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sudo sh</code>
+                <code>curl -fsSL https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sh</code>
             </div>
 
             <div class="tab-content" id="wget">
-                <code>wget -qO- https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sudo sh</code>
+                <code>wget -qO- https://raw.githubusercontent.com/arch2kx/aronasay/main/install/install.sh | sh</code>
             </div>
         </div>
     </div>

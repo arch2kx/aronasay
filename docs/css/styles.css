@@ -190,6 +190,10 @@ img {
     max-width: 100%;
 }
 
+html {
+    overscroll-behavior: none;
+}
+
 body {
     background: #fff7f0;
     color: #2c3565;

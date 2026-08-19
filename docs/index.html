@@ -26,7 +26,7 @@
         </h1>
         <p class="tagline">Cowsay, but <i>Arona</i> is the cow. Pipe <b>(almost)</b> anything through her and she says it back.</p>
         <div class="actions">
-          <a class="btn btn-primary" href="#install"><span>Install aronasay ⇀</span></a>
+          <a class="btn btn-primary" id="btn-smooth-scroll" href="#install"><span>Install aronasay ⇀</span></a>
           <a class="btn btn-ghost" href="https://github.com/arch2kx/aronasay"><span>Source Code ⇀</span></a>
         </div>
       </div>
@@ -129,6 +129,20 @@ document.querySelectorAll('.install-tabs').forEach(function (list) {
       t.tabIndex = on ? 0 : -1;
       panel.classList.toggle('is-active', on);
       panel.hidden = !on;
+    });
+  }
+
+
+  const buttonSmoothScroll = document.getElementById("btn-smooth-scroll");
+  const targetSection = document.getElementById("install");
+
+  if (buttonSmoothScroll && targetSection) {
+    buttonSmoothScroll.addEventListener('click', function (event) {
+      event.preventDefault();  // Prevent abrupt default jumping
+      targetSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     });
   }
 
